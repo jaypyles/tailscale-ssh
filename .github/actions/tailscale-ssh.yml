@@ -1,0 +1,47 @@
+name: Tailscale-SSH
+description: Use Tailscale tailnet to connect to a server via SSH and run a script.
+author: "Jayden Pyles"
+inputs:
+  ts-oauth-client-id:
+    description: Tailscale OAuth Client ID
+    required: true
+  ts-oauth-secret:
+    description: Tailscale OAuth Secret
+    required: true
+  tag:
+    description: Tag used for CI
+    required: false
+    default: ci
+  host:
+    description: Tailscale IP for Machine
+    required: true
+  port:
+    description: SSH port
+    required: false
+    default: 22
+  username:
+    description: Username of account to SSH into machine
+    required: true
+  password:
+    description: Password of account to SSH into machine
+    required: true
+  script:
+    description: Command to be ran
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        oauth-client-id: ${{ inputs.ts-oauth-client-id }}
+        oauth-secret: ${{ inputs.ts-oauth-secret }}
+        tags: tag:${{ inputs.tag }}
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        port: ${{ inputs.port }}
+        script: ${{ inputs.script }}
